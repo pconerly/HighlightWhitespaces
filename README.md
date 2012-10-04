@@ -55,3 +55,8 @@ Highlighting may be disabled for large files. The default threshold is around
 ```
 { "highlight_whitespaces_file_max_size": 1000}
 ```
+
+### Credits
+
+This is a modified version of the TrailingSpaces plugin by Jean-Denis Vauguet and Oktay Acikalin
+TrailingSpaces is at https://github.com/SublimeText/TrailingSpaces/
