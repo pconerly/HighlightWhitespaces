@@ -2,11 +2,9 @@
 
 This is a [Sublime Text 2](http://www.sublimetext.com/2) plugin.
 
-**Highlight trailing spaces and delete them in a flash.**
+**Highlight whitespaces in documents**
 
-ST2 provides a way to automatically delete trailing spaces upon file save.
-Depending on your settings, it may be more handy to just highlight them and/or
-delete them by hand. This plugin provides just that!
+This plugin will highlight each tab or more-than-one space in the document.
 
 ## Installation
 
@@ -19,7 +17,7 @@ Go to your `Packages` subdirectory under ST2's data directory:
 
 Then clone this repository:
 
-    git clone git://github.com/SublimeText/TrailingSpaces.git
+```git clone git://github.com/disq/HighlightWhitespaces.git```
 
 That's it!
 
@@ -29,24 +27,20 @@ Several options are available to customize the plugin look 'n feel. The
 config keys goes into config files accessible throught the "Preferences"
 menu.
 
-### Bind the deletion command to a shortcut
+### Toggle highlight shortcut
 
-In order to use the deletion feature, one must add the mapping by hand
-(this should probably go into "Key Bindings - User"):
-
-``` js
-{ "keys": ["ctrl+shift+t"], "command": "delete_trailing_spaces" }
-
-Here, pressing Ctrl + Shift + t will delete all trailing spaces.
-```
+The default toggle highlight shortcut is ```ctrl+alt+w``` (```cmd+alt+w``` for OS X)
 
 ### Change the highlighting color
 
 One may also change the highlighting color, providing a scope name such
 as "invalid", "comment"... in "File Settings - User":
 
-``` js
-{ "trailing_spaces_highlight_color": "invalid" }
+```
+{
+	"highlight_whitespaces_space_highlight_scope_name": "invalid",
+	"highlight_whitespaces_tab_highlight_scope_name": "invalid"
+}
 ```
 
 Actually, "invalid" is the default value. If you'd like to use a custom color,
@@ -58,9 +52,6 @@ how to do it.
 Highlighting may be disabled for large files. The default threshold is around
 1M chars. This is configurable (in "File Settings - User"); unit is number of chars:
 
-``` js
-{ "trailing_spaces_file_max_size": 1000}
 ```
-
-Even though the trailing spaces are not highlighted, one can still delete them
-using the deletion command.
+{ "highlight_whitespaces_file_max_size": 1000}
+```
