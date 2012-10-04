@@ -1,20 +1,24 @@
 '''
-Provides both a trailing spaces highlighter and a deletion command.
+Marks all tabs and two or more spaces in each line with separate colors
 
 Config summary (see README.md for details):
 
     # key binding
-    { "keys": ["ctrl+shift+t"], "command": "delete_trailing_spaces" }
+    { "keys": ["ctrl+alt+w"], "command": "hws_toggle_whitespaces" }
 
     # file settings
     {
-      "trailing_spaces_highlight_color": "invalid",
-      "trailing_spaces_file_max_size": 1000
+    "highlight_whitespaces_space_highlight_scope_name": "invalid",
+    "highlight_whitespaces_tab_highlight_scope_name": "invalid",
+    "highlight_whitespaces_file_max_size": 1048576,
+    "highlight_whitespaces_enabled": true
     }
 
-@author: Jean-Denis Vauguet <jd@vauguet.fr>, Oktay Acikalin <ok@ryotic.de>
+Forked from https://github.com/SublimeText/TrailingSpaces/ by Jean-Denis Vauguet <jd@vauguet.fr>, Oktay Acikalin <ok@ryotic.de>
+
+@author: Kemal Hadimli <disq@sf.net>
 @license: MIT (http://www.opensource.org/licenses/mit-license.php)
-@since: 2011-02-25
+@since: 2012-10-05
 '''
 
 import sublime
@@ -25,86 +29,86 @@ DEFAULT_COLOR_SCOPE_NAME = "invalid"
 DEFAULT_IS_ENABLED = True
 
 #Set whether the plugin is on or off
-ts_settings = sublime.load_settings('trailing_spaces.sublime-settings')
-trailing_spaces_enabled = bool(ts_settings.get('trailing_spaces_enabled',
+hws_settings = sublime.load_settings('highlight_whitespaces.sublime-settings')
+hws_enabled = bool(hws_settings.get('highlight_whitespaces_enabled',
                                                DEFAULT_IS_ENABLED))
 
 # Determine if the view is a find results view
 def is_find_results(view):
     return view.settings().get('syntax') and "Find Results" in view.settings().get('syntax')
 
-# Return an array of regions matching trailing spaces.
-def find_trailing_spaces(view):
-    include_empty_lines = bool(ts_settings.get('trailing_spaces_include_empty_lines',
-                                               DEFAULT_IS_ENABLED))
-    return view.find_all('[ \t]+$' if include_empty_lines else '(?<=\S)[\t ]+$')
+# Return an array of regions matching whitespaces.
+def find_whitespaces_spaces(view):
+    return view.find_all(' {2,}')
+
+def find_whitespaces_tabs(view):
+    return view.find_all('\t+')
 
 
-# Highlight trailing spaces
-def highlight_trailing_spaces(view):
-    max_size = ts_settings.get('trailing_spaces_file_max_size',
+# Highlight whitespaces
+def highlight_whitespaces(view):
+    max_size = hws_settings.get('highlight_whitespaces_file_max_size',
                                DEFAULT_MAX_FILE_SIZE)
-    color_scope_name = ts_settings.get('trailing_spaces_highlight_color',
+    space_scope_name = hws_settings.get('highlight_whitespaces_space_highlight_scope_name',
+                                       DEFAULT_COLOR_SCOPE_NAME)
+    tab_scope_name = hws_settings.get('highlight_whitespaces_tab_highlight_scope_name',
                                        DEFAULT_COLOR_SCOPE_NAME)
     if view.size() <= max_size and not is_find_results(view):
-        regions = find_trailing_spaces(view)
-        view.add_regions('TrailingSpacesHighlightListener',
-                         regions, color_scope_name,
+        space_regions = find_whitespaces_spaces(view)
+        view.add_regions('WhitespacesHighlightListener',
+                         space_regions, space_scope_name,
+                         sublime.DRAW_EMPTY)
+        tab_regions = find_whitespaces_tabs(view)
+        view.add_regions('WhitespacesHighlightListener2',
+                         tab_regions, tab_scope_name,
                          sublime.DRAW_EMPTY)
 
 
-# Clear all trailing spaces
-def clear_trailing_spaces_highlight(window):
+# Clear all white spaces
+def clear_whitespaces_highlight(window):
     for view in window.views():
-        view.erase_regions('TrailingSpacesHighlightListener')
+        view.erase_regions('WhitespacesHighlightListener')
+        view.erase_regions('WhitespacesHighlightListener2')
 
 
 # Toggle the event listner on or off
-class ToggleTrailingSpacesCommand(sublime_plugin.WindowCommand):
+class HwsToggleWhitespacesCommand(sublime_plugin.WindowCommand):
     def run(self):
-        global trailing_spaces_enabled
-        trailing_spaces_enabled = False if trailing_spaces_enabled else True
+        global hws_enabled
+        hws_enabled = False if hws_enabled else True
 
         # If toggling on, go ahead and perform a pass,
         # else clear the highlighting in all views
-        if trailing_spaces_enabled:
-            highlight_trailing_spaces(self.window.active_view())
+        if hws_enabled:
+            highlight_whitespaces(self.window.active_view())
         else:
-            clear_trailing_spaces_highlight(self.window)
+            clear_whitespaces_highlight(self.window)
 
 
 # Highlight matching regions.
-class TrailingSpacesHighlightListener(sublime_plugin.EventListener):
+class WhitespacesHighlightListener(sublime_plugin.EventListener):
     def on_modified(self, view):
-        if trailing_spaces_enabled:
-            highlight_trailing_spaces(view)
+        if hws_enabled:
+            highlight_whitespaces(view)
 
     def on_activated(self, view):
-        if trailing_spaces_enabled:
-            highlight_trailing_spaces(view)
+        if hws_enabled:
+            highlight_whitespaces(view)
 
     def on_load(self, view):
-        if trailing_spaces_enabled:
-            highlight_trailing_spaces(view)
+        if hws_enabled:
+            highlight_whitespaces(view)
 
+class WhitespacesHighlightListener2(sublime_plugin.EventListener):
+    def on_modified(self, view):
+        if hws_enabled:
+            highlight_whitespaces(view)
 
-# Allows to erase matching regions.
-class DeleteTrailingSpacesCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        regions = find_trailing_spaces(self.view)
-        if regions:
-            # deleting a region changes the other regions positions, so we
-            # handle this maintaining an offset
-            offset = 0
-            for region in regions:
-                r = sublime.Region(region.a + offset, region.b + offset)
-                self.view.erase(edit, sublime.Region(r.a, r.b))
-                offset -= r.size()
+    def on_activated(self, view):
+        if hws_enabled:
+            highlight_whitespaces(view)
 
-            msg_parts = {"nbRegions": len(regions),
-                         "plural":    's' if len(regions) > 1 else ''}
-            msg = "Deleted %(nbRegions)s trailing spaces region%(plural)s" % msg_parts
-        else:
-            msg = "No trailing spaces to delete!"
+    def on_load(self, view):
+        if hws_enabled:
+            highlight_whitespaces(view)
 
-        sublime.status_message(msg)
