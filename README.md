@@ -59,4 +59,5 @@ Highlighting may be disabled for large files. The default threshold is around
 ### Credits
 
 This is a modified version of the TrailingSpaces plugin by Jean-Denis Vauguet and Oktay Acikalin
+
 TrailingSpaces is at https://github.com/SublimeText/TrailingSpaces/
