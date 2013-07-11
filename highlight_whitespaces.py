@@ -58,7 +58,6 @@ def highlight_whitespaces(view):
     tab_scope_name = hws_settings.get('highlight_whitespaces_tab_highlight_scope_name',
                                        DEFAULT_COLOR_SCOPE_NAME)
     if view.size() <= max_size and not is_find_results(view):
-        print "check spaces? %s" % hws_settings.get('highlight_whitespaces_check_spaces', DEFAULT_CHECK_SPACES)
         if hws_settings.get('highlight_whitespaces_check_spaces', DEFAULT_CHECK_SPACES):
             space_regions = find_whitespaces_spaces(view)
             view.add_regions('WhitespacesHighlightListener',

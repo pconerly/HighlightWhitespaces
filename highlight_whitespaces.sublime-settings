@@ -4,7 +4,6 @@
 
   // Tabs color is determined by scope (default, "invalid")
 //  "highlight_whitespaces_tab_highlight_scope_name": "Whitespaces.tab.highlight",
-  "debug": true,
   // Max file size to search
   "highlight_whitespaces_file_max_size": 1048576,
 
